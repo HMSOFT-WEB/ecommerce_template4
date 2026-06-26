@@ -127,10 +127,10 @@ function Hero() {
 
 function FeaturedProducts() {
   const products = [
-    { name: "Structured Wool Coat", price: "$450.00" },
-    { name: "Silk Crepe Blouse", price: "$185.00" },
-    { name: "Leather Crossbody", price: "$320.00" },
-    { name: "Tailored Trousers", price: "$210.00" }
+    { name: "Structured Wool Coat", price: "$450.00", image: "./prod1.png" },
+    { name: "Silk Crepe Blouse", price: "$185.00", image: "./prod2.png" },
+    { name: "Leather Crossbody", price: "$320.00", image: "./prod1.png" },
+    { name: "Tailored Trousers", price: "$210.00", image: "./prod2.png" }
   ];
 
   return (
@@ -151,6 +151,7 @@ function FeaturedProducts() {
             transition={{ duration: 0.6, delay: idx * 0.1 }}
           >
             <div className="product-image-container">
+              <img src={product.image} alt={product.name} className="product-image" />
               <button className="add-to-cart-btn">Add to Cart</button>
             </div>
             <div className="product-info">
@@ -168,7 +169,7 @@ function CuratedCollection() {
   return (
     <section className="collection-banner">
       <div className="collection-image">
-        {/* Placeholder for editorial image */}
+        <img src="./prod1.png" alt="Editorial" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
       <div className="collection-content">
         <motion.h2
