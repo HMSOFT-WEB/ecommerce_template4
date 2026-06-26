@@ -1,56 +1,65 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Environment, Float, PresentationControls, ContactShadows } from '@react-three/drei';
+import { Environment, Float, PresentationControls, ContactShadows, MeshTransmissionMaterial } from '@react-three/drei';
+import { EffectComposer, Bloom, DepthOfField } from '@react-three/postprocessing';
 import { motion } from 'framer-motion';
 import { Search, ShoppingBag, User, ArrowRight } from 'lucide-react';
 import * as THREE from 'three';
 import './index.css';
 
-// Elegant 3D Glass Pedestal / Abstract Shapes
-function GlassSculpture() {
-  const groupRef = useRef();
-  
-  // Create beautiful frosted/fluted glass material
-  const glassMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: '#ffffff',
-    metalness: 0.1,
-    roughness: 0.15,
-    transmission: 0.95, // Glass effect
-    thickness: 2,
-    ior: 1.5,
-    clearcoat: 1,
-    clearcoatRoughness: 0.1,
-  }), []);
+// Import images directly so Vite bundles them correctly
+import prod1 from './assets/prod1.png';
+import prod2 from './assets/prod2.png';
 
-  // Matte black accent material
-  const matteMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: '#111111',
-    roughness: 0.8,
-    metalness: 0.2
-  }), []);
+// Ultra-High Quality 3D Luxury Crystal Pedestal
+function LuxuryCrystal() {
+  const meshRef = useRef();
 
   useFrame((state, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.2;
+    if (meshRef.current) {
+      meshRef.current.rotation.x += delta * 0.2;
+      meshRef.current.rotation.y += delta * 0.3;
     }
   });
 
   return (
-    <group ref={groupRef} position={[0, -1, 0]}>
-      <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-        {/* Central Glass Pedestal */}
-        <mesh position={[0, 0, 0]} material={glassMaterial}>
-          <cylinderGeometry args={[1.5, 1.5, 4, 32]} />
+    <group position={[0, 0, 0]}>
+      <Float speed={2} rotationIntensity={1.5} floatIntensity={2}>
+        {/* Core Crystal Geometry */}
+        <mesh ref={meshRef}>
+          <octahedronGeometry args={[1.8, 2]} />
+          <MeshTransmissionMaterial 
+            backside
+            backsideThickness={1}
+            thickness={2}
+            roughness={0}
+            transmission={1}
+            ior={1.5}
+            chromaticAberration={0.05}
+            anisotropy={0.5}
+            distortion={0.2}
+            distortionScale={0.5}
+            temporalDistortion={0.1}
+            color="#ffffff"
+            attenuationColor="#ffffff"
+            attenuationDistance={1}
+          />
         </mesh>
         
-        {/* Floating Ring Accent */}
-        <mesh position={[0, 1.5, 0]} rotation={[Math.PI / 4, 0, 0]} material={matteMaterial}>
-          <torusGeometry args={[2.2, 0.05, 16, 64]} />
+        {/* Inner Gold Core */}
+        <mesh>
+          <icosahedronGeometry args={[0.8, 0]} />
+          <meshStandardMaterial color="#d4af37" metalness={1} roughness={0.1} />
         </mesh>
-        
-        {/* Floating Sphere Inside */}
-        <mesh position={[0, 0, 0]} material={matteMaterial}>
-          <sphereGeometry args={[0.5, 32, 32]} />
+
+        {/* Orbiting Black Rings */}
+        <mesh rotation={[Math.PI / 3, 0, 0]}>
+          <torusGeometry args={[2.5, 0.02, 16, 100]} />
+          <meshStandardMaterial color="#000000" metalness={0.8} roughness={0.2} />
+        </mesh>
+        <mesh rotation={[-Math.PI / 3, Math.PI / 2, 0]}>
+          <torusGeometry args={[2.8, 0.01, 16, 100]} />
+          <meshStandardMaterial color="#d4af37" metalness={1} roughness={0} />
         </mesh>
       </Float>
     </group>
@@ -92,15 +101,20 @@ function Hero() {
       <div className="hero-3d-bg">
         <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
           <ambientLight intensity={0.5} />
-          <directionalLight position={[10, 10, 10]} intensity={1} />
-          <directionalLight position={[-10, 5, -10]} intensity={0.5} color="#d4af37" />
-          <Environment preset="studio" />
+          <directionalLight position={[10, 10, 10]} intensity={2} />
+          <directionalLight position={[-10, 5, -10]} intensity={1} color="#d4af37" />
+          <Environment preset="city" />
           
           <PresentationControls global config={{ mass: 2, tension: 500 }} snap={{ mass: 4, tension: 1500 }} rotation={[0.1, 0, 0]} polar={[-Math.PI / 4, Math.PI / 4]} azimuth={[-Math.PI / 4, Math.PI / 4]}>
-            <GlassSculpture />
+            <LuxuryCrystal />
           </PresentationControls>
           
-          <ContactShadows position={[0, -3.5, 0]} opacity={0.6} scale={10} blur={2} far={4} color="#000000" />
+          <ContactShadows position={[0, -3.5, 0]} opacity={0.8} scale={10} blur={2.5} far={4} color="#000000" />
+          
+          <EffectComposer>
+            <Bloom luminanceThreshold={0.5} mipmapBlur intensity={1.5} />
+            <DepthOfField focusDistance={0} focalLength={0.02} bokehScale={2} height={480} />
+          </EffectComposer>
         </Canvas>
       </div>
       
@@ -127,10 +141,10 @@ function Hero() {
 
 function FeaturedProducts() {
   const products = [
-    { name: "Structured Wool Coat", price: "$450.00", image: "./prod1.png" },
-    { name: "Silk Crepe Blouse", price: "$185.00", image: "./prod2.png" },
-    { name: "Leather Crossbody", price: "$320.00", image: "./prod1.png" },
-    { name: "Tailored Trousers", price: "$210.00", image: "./prod2.png" }
+    { name: "Structured Wool Coat", price: "$450.00", image: prod1 },
+    { name: "Silk Crepe Blouse", price: "$185.00", image: prod2 },
+    { name: "Leather Crossbody", price: "$320.00", image: prod1 },
+    { name: "Tailored Trousers", price: "$210.00", image: prod2 }
   ];
 
   return (
@@ -169,7 +183,7 @@ function CuratedCollection() {
   return (
     <section className="collection-banner">
       <div className="collection-image">
-        <img src="./prod1.png" alt="Editorial" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img src={prod1} alt="Editorial" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
       <div className="collection-content">
         <motion.h2
